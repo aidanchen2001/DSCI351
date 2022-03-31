@@ -1,1 +1,1 @@
-# DSCI351
+# DSCI351 Project
