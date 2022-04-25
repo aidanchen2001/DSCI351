@@ -1,15 +1,15 @@
-from flask import Flask, render_template
-from flask_wtf import FlaskForm
+from flask import FlaskForm, render_template, request
 from flask_sqlalchemy import SQLAlchemy
-import mysql.connector
+from flask_wtf import FlaskForm
+from wtforms import SelectField, IntegerField, BooleanField, SubmitField, RadioField
 
-app = Flask(__name__)
+app = FlaskForm(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:Lifeis2good!@localhost/colleges.info'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Initialize database
 db = SQLAlchemy(app)
 
-class colleges(db.Model):
+class Colleges(db.Model):
     unitID = db.Column(db.Integer, primary_key=True, nullable=False)
     name = db.Column(db.String)
     state = db.Column(db.String)
@@ -47,13 +47,28 @@ class colleges(db.Model):
     submitACTRate = db.Column(db.Integer)
     ratio = db.Column(db.Integer)
 
-# class TuitionForm(FlaskForm):
-    # maxTuition = IntegerField("")
+# https://www.youtube.com/watch?v=I2dJuNwlIH0
+# https://www.youtube.com/watch?v=-O9NMdvWmE8
 
-@app.route('/')
+class Form(FlaskForm):
+    maxTuition = IntegerField('Tuition Preference')
+    SATScore = RadioField('SAT Score', choices=[])
+    size = BooleanField('Size Preference', choices=[])
+    region = SelectField('Region Preference', choices=['U.S. Service','New England','Mid West','Great Lakes','Plains','Southeast','Southwest','Rocky Mountains','Far West'])
+    submit = SubmitField('Submit')
+
+# StringField: A text input.
+# TextAreaField: A text area field.
+# IntegerField: A field for integers.
+# BooleanField: A checkbox field.
+# RadioField: A field for displaying a list of radio buttons for the user to choose from.
+
+@app.route('/', methods=['GET','POST'])
 def index():
-    return render_template("index.html")
+    form = Form()  # instantiate form
+    if request.method == 'POST':
+        colleges = Colleges.query.filter_by(Colleges.region == form.region.data).all()  # list of college objects
+        # colleges = db.execute("SELECT * FROM Colleges.info WHERE region=")
 
-@app.route('/')
-def query():
+    return render_template('index.html', form=form)
     
